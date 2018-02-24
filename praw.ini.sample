@@ -1,0 +1,4 @@
+[test]
+client_id=dummy
+client_secret=dummy
+user_agent='dummy'
