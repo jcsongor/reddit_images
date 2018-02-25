@@ -21,7 +21,6 @@ class ImageDownloader(object):
 class ImageFetcher(object):
     """Class to validate and download an image"""
     _TMP_PATH = '/tmp/'
-    _ALLOWED_TYPES = ['jpeg', 'png']
 
     def fetch(self, url, target_dir, subreddit_name):
         url_validator = UrlValidator()
@@ -35,10 +34,17 @@ class ImageFetcher(object):
         return target_dir.rstrip('/') + '/' + subreddit_name + '_' + url.split('/')[-1].lstrip('.')
 
     def _move_from_temp_if_is_image(self, temp_file, target_file):
-        if what(temp_file) in self._ALLOWED_TYPES:
+        if FileValidator().is_image(temp_file):
             rename(temp_file, target_file)
         else:
             remove(temp_file)
+
+
+class FileValidator(object):
+    _ALLOWED_TYPES = ['jpeg', 'png']
+
+    def is_image(self, file):
+        return what(file) in self._ALLOWED_TYPES
 
 
 class UrlProvider(object):

@@ -81,48 +81,30 @@ class ImageFetcherTest(TestCase):
         urlretrieve.assert_not_called()
 
     @patch('imageDownloader.rename')
-    @patch('imageDownloader.what')
+    @patch('imageDownloader.FileValidator')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
     def test_fetch_image_moves_file_to_target_directory_if_it_is_of_allowed_type(self,
                                                                                  urlretrieve,
                                                                                  urlvalidator,
-                                                                                 what,
+                                                                                 filevalidator,
                                                                                  rename):
         urlvalidator.return_value.is_valid.return_value = True
         urlvalidator.return_value.is_image.return_value = True
-        what.return_value = 'jpeg'
+        filevalidator.return_value.is_image.return_value = True
         self._fetch_image()
-        rename.assert_called_with(self._get_tmp_file_path(),
-                                  self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename)
+        target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
+        rename.assert_called_with(self._get_tmp_file_path(), target_filename)
 
     @patch('imageDownloader.remove')
     @patch('imageDownloader.rename')
-    @patch('imageDownloader.what')
+    @patch('imageDownloader.FileValidator')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_removes_file_if_it_is_not_an_image(self, urlretrieve, urlvalidator, what, rename, remove):
+    def test_fetch_image_removes_file_if_it_is_not_an_image(self, urlretrieve, urlvalidator, filevalidator, rename, remove):
         urlvalidator.return_value.is_valid.return_value = True
         urlvalidator.return_value.is_image.return_value = True
-        what.return_value = None
-        self._fetch_image()
-        rename.assert_not_called()
-        remove.assert_called_with(self._get_tmp_file_path())
-
-    @patch('imageDownloader.remove')
-    @patch('imageDownloader.rename')
-    @patch('imageDownloader.what')
-    @patch('imageDownloader.UrlValidator')
-    @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_removes_file_if_it_is_not_of_allowed_type(self,
-                                                                   urlretrieve,
-                                                                   urlvalidator,
-                                                                   what,
-                                                                   rename,
-                                                                   remove):
-        urlvalidator.return_value.is_valid.return_value = True
-        urlvalidator.return_value.is_image.return_value = True
-        what.return_value = 'exe'
+        filevalidator.return_value.is_image.return_value = False
         self._fetch_image()
         rename.assert_not_called()
         remove.assert_called_with(self._get_tmp_file_path())
@@ -134,6 +116,20 @@ class ImageFetcherTest(TestCase):
 
     def _get_tmp_file_path(self):
         return self._image_fetcher._TMP_PATH + self._uuid_value
+
+class FileValidatorTest(TestCase):
+    def setUp(self):
+        self._file_validator = FileValidator()
+
+    @patch('imageDownloader.what')
+    def test_is_image_returns_true_if_file_is_an_image(self, what):
+        what.return_value = 'jpeg'
+        self.assertTrue(self._file_validator.is_image('filename'))
+
+    @patch('imageDownloader.what')
+    def test_is_image_returns_false_if_file_is_not_an_image(self, what):
+        what.return_value = 'exe'
+        self.assertFalse(self._file_validator.is_image('filename'))
 
 
 class UrlProviderTest(TestCase):
