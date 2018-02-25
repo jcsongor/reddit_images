@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, call
 
-from imageDownloader import *
+from image_downloader import *
 
 
 class ImageDownloaderTest(TestCase):
@@ -12,14 +12,14 @@ class ImageDownloaderTest(TestCase):
     def setUp(self):
         self.image_downloader = ImageDownloader()
 
-    @patch('imageDownloader.UrlProvider')
+    @patch('image_downloader.UrlProvider')
     def test_download_images_from_creates_urlprovider_with_correct_bot_name(self, url_provider):
         self.image_downloader.download_images_from_subreddit(self._bot_name,
                                                              self._subreddit_name, 100,
                                                              self._target_directory)
         url_provider.assert_called_with(self._bot_name)
 
-    @patch('imageDownloader.UrlProvider')
+    @patch('image_downloader.UrlProvider')
     def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self, url_provider):
         self.image_downloader.download_images_from_subreddit(self._bot_name,
                                                              self._subreddit_name,
@@ -27,8 +27,8 @@ class ImageDownloaderTest(TestCase):
                                                              self._target_directory)
         url_provider.return_value.get_urls.assert_called_with(self._subreddit_name, 100)
 
-    @patch('imageDownloader.ImageFetcher.fetch')
-    @patch('imageDownloader.UrlProvider')
+    @patch('image_downloader.ImageFetcher.fetch')
+    @patch('image_downloader.UrlProvider')
     def test_download_images_from_subreddit_calls_fetch_for_each_url(self, url_provider, fetch):
         image_urls = ['img1', 'img2']
         url_provider.return_value.get_urls.return_value = image_urls
@@ -48,28 +48,28 @@ class ImageFetcherTest(TestCase):
     def setUp(self):
         self._image_fetcher = ImageFetcher()
 
-    @patch('imageDownloader.rename')
-    @patch('imageDownloader.what')
-    @patch('imageDownloader.UrlValidator')
-    @patch('imageDownloader.urlretrieve')
+    @patch('image_downloader.rename')
+    @patch('image_downloader.what')
+    @patch('image_downloader.UrlValidator')
+    @patch('image_downloader.urlretrieve')
     def test_fetch_image_downloads_image_to_tmp_file(self, urlretrieve, urlvalidator, what, rename):
         urlvalidator.return_value.is_image.return_value = True
         what.return_value = 'jpeg'
         self._fetch_image()
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
 
-    @patch('imageDownloader.rename')
-    @patch('imageDownloader.UrlValidator')
-    @patch('imageDownloader.urlretrieve')
+    @patch('image_downloader.rename')
+    @patch('image_downloader.UrlValidator')
+    @patch('image_downloader.urlretrieve')
     def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, urlvalidator, rename):
         urlvalidator.return_value.is_image.return_value = False
         self._fetch_image()
         urlretrieve.assert_not_called()
 
-    @patch('imageDownloader.rename')
-    @patch('imageDownloader.FileValidator')
-    @patch('imageDownloader.UrlValidator')
-    @patch('imageDownloader.urlretrieve')
+    @patch('image_downloader.rename')
+    @patch('image_downloader.FileValidator')
+    @patch('image_downloader.UrlValidator')
+    @patch('image_downloader.urlretrieve')
     def test_fetch_image_moves_file_to_target_directory_if_it_is_an_image(self,
                                                                           urlretrieve,
                                                                           urlvalidator,
@@ -81,11 +81,11 @@ class ImageFetcherTest(TestCase):
         target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
         rename.assert_called_with(self._get_tmp_file_path(), target_filename)
 
-    @patch('imageDownloader.remove')
-    @patch('imageDownloader.rename')
-    @patch('imageDownloader.FileValidator')
-    @patch('imageDownloader.UrlValidator')
-    @patch('imageDownloader.urlretrieve')
+    @patch('image_downloader.remove')
+    @patch('image_downloader.rename')
+    @patch('image_downloader.FileValidator')
+    @patch('image_downloader.UrlValidator')
+    @patch('image_downloader.urlretrieve')
     def test_fetch_image_removes_file_if_it_is_not_an_image(self,
                                                             urlretrieve,
                                                             urlvalidator,
@@ -98,7 +98,7 @@ class ImageFetcherTest(TestCase):
         rename.assert_not_called()
         remove.assert_called_with(self._get_tmp_file_path())
 
-    @patch('imageDownloader.uuid4')
+    @patch('image_downloader.uuid4')
     def _fetch_image(self, uuid):
         uuid.return_value = self._uuid_value
         self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
@@ -113,22 +113,22 @@ class FileValidatorTest(TestCase):
     def setUp(self):
         self._file_validator = FileValidator()
 
-    @patch('imageDownloader.what')
+    @patch('image_downloader.what')
     def test_is_image_returns_true_if_file_is_an_image(self, what):
         what.return_value = 'jpeg'
         self.assertTrue(self._file_validator.is_image(self._filename))
 
-    @patch('imageDownloader.what')
+    @patch('image_downloader.what')
     def test_is_image_returns_false_if_file_is_not_an_image(self, what):
         what.return_value = 'exe'
         self.assertFalse(self._file_validator.is_image(self._filename))
 
-    @patch('imageDownloader.Image.open')
+    @patch('image_downloader.Image.open')
     def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
         image_open.return_value.size = (1280, 720)
         self.assertTrue(self._file_validator.is_landscape_image(self._filename))
 
-    @patch('imageDownloader.Image.open')
+    @patch('image_downloader.Image.open')
     def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
         image_open.return_value.size = (720, 1280)
         self.assertFalse(self._file_validator.is_landscape_image(self._filename))

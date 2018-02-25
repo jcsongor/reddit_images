@@ -1,22 +1,38 @@
 #!/usr/bin/python
-import praw
+# -*- coding: utf-8 -*-
+"""Download images from top reddit posts
+
+Example:
+    Fetch 5 pictures from /r/FractalPorn and /r/ExposurePorn from hot posts and
+    dowload it to ~/backgrounds
+        $ python3 imageDownloader.py FractalPorn,ExposurePorn 5 ~/backgrounds
+
+Todo:
+    * make cli interface more flexible
+    * optionally download only landscape/portrait images
+    * optionally download from hot/top etc
+
+"""
 import sys
-import validators
 from imghdr import what
 from os import remove, rename
 from urllib.request import urlretrieve
 from uuid import uuid4
+
 from PIL import Image
+import praw
+import validators
 
 
 class ImageDownloader(object):
-    """Class to download top `n` images from a given subreddit"""
+    """Download top images from a given reddit"""
 
     def download_images_from_subreddit(self,
                                        bot_name,
                                        subreddit_name,
                                        number_of_images,
                                        target_directory):
+        """Download top `n` images from a given subreddit"""
         url_provider = UrlProvider(bot_name)
         image_fetcher = ImageFetcher()
         for url in url_provider.get_urls(subreddit_name, number_of_images):
@@ -24,10 +40,11 @@ class ImageDownloader(object):
 
 
 class ImageFetcher(object):
-    """Class to validate and download an image"""
+    """Validate and download an image"""
     _TMP_PATH = '/tmp/'
 
     def fetch(self, url, target_dir, subreddit_name):
+        """Download one url, check if it is an image. If it isn't delete it."""
         url_validator = UrlValidator()
         temp_file = self._TMP_PATH + str(uuid4())
         if url_validator.is_image(url):
@@ -46,12 +63,15 @@ class ImageFetcher(object):
 
 
 class FileValidator(object):
+    """Validate file type and image format"""
     _ALLOWED_TYPES = ['jpeg', 'png']
 
     def is_image(self, file):
+        """Check file contents to see if it looks like an image"""
         return what(file) in self._ALLOWED_TYPES
 
     def is_landscape_image(self, file):
+        """Check image size to determine if it is landscape or portrait"""
         size = Image.open(file).size
         return size[0] > size[1]
 
@@ -63,6 +83,7 @@ class UrlProvider(object):
         self.reddit = praw.Reddit(bot_name)
 
     def get_urls(self, subreddit_name, number_of_images):
+        """Get urls for given number of hot posts from given subreddit"""
         subreddit = self.reddit.subreddit(subreddit_name)
         return (submission.url for submission in subreddit.hot(limit=number_of_images))
 
@@ -88,18 +109,20 @@ class UrlValidator(object):
     ]
 
     def is_image(self, url):
+        """Check if url looks like an image - it has proper extension"""
         return self.is_valid(url) and \
                url.count('.') and \
                url.split('.')[-1] in self._image_extensions
 
     def is_valid(self, url):
+        """Check if string looks like a valid url"""
         return validators.url(url) is True
 
 
 if __name__ == "__main__":
-    image_downloader = ImageDownloader()
-    for subreddit in sys.argv[1].split(','):
-        image_downloader.download_images_from_subreddit('bgr',
-                                                        subreddit,
+    IMAGE_DOWNLOADER = ImageDownloader()
+    for subreddit_name in sys.argv[1].split(','):
+        IMAGE_DOWNLOADER.download_images_from_subreddit('bgr',
+                                                        subreddit_name,
                                                         int(sys.argv[2]),
                                                         sys.argv[3] + '/')
