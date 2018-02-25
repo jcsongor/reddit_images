@@ -12,7 +12,11 @@ from PIL import Image
 class ImageDownloader(object):
     """Class to download top `n` images from a given subreddit"""
 
-    def download_images_from_subreddit(self, bot_name, subreddit_name, number_of_images, target_directory):
+    def download_images_from_subreddit(self,
+                                       bot_name,
+                                       subreddit_name,
+                                       number_of_images,
+                                       target_directory):
         url_provider = UrlProvider(bot_name)
         image_fetcher = ImageFetcher()
         for url in url_provider.get_urls(subreddit_name, number_of_images):
@@ -31,8 +35,8 @@ class ImageFetcher(object):
             target_file = self._generate_filename(subreddit_name, target_dir, url)
             self._move_from_temp_if_is_image(temp_file, target_file)
 
-    def _generate_filename(self, subreddit_name, target_dir, url):
-        return target_dir.rstrip('/') + '/' + subreddit_name + '_' + url.split('/')[-1].lstrip('.')
+    def _generate_filename(self, subreddit, target_dir, url):
+        return target_dir.rstrip('/') + '/' + subreddit + '_' + url.split('/')[-1].lstrip('.')
 
     def _move_from_temp_if_is_image(self, temp_file, target_file):
         if FileValidator().is_image(temp_file):
@@ -84,7 +88,9 @@ class UrlValidator(object):
     ]
 
     def is_image(self, url):
-        return self.is_valid(url) and url.count('.') and url.split('.')[-1] in self._image_extensions
+        return self.is_valid(url) and \
+               url.count('.') and \
+               url.split('.')[-1] in self._image_extensions
 
     def is_valid(self, url):
         return validators.url(url) is True
@@ -93,4 +99,7 @@ class UrlValidator(object):
 if __name__ == "__main__":
     image_downloader = ImageDownloader()
     for subreddit in sys.argv[1].split(','):
-        image_downloader.download_images_from_subreddit('bgr', subreddit, int(sys.argv[2]), sys.argv[3] + '/')
+        image_downloader.download_images_from_subreddit('bgr',
+                                                        subreddit,
+                                                        int(sys.argv[2]),
+                                                        sys.argv[3] + '/')
