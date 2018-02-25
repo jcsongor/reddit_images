@@ -71,10 +71,10 @@ class ImageFetcherTest(TestCase):
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
     def test_fetch_image_moves_file_to_target_directory_if_it_is_an_image(self,
-                                                                                 urlretrieve,
-                                                                                 urlvalidator,
-                                                                                 filevalidator,
-                                                                                 rename):
+                                                                          urlretrieve,
+                                                                          urlvalidator,
+                                                                          filevalidator,
+                                                                          rename):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = True
         self._fetch_image()
@@ -86,7 +86,12 @@ class ImageFetcherTest(TestCase):
     @patch('imageDownloader.FileValidator')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_removes_file_if_it_is_not_an_image(self, urlretrieve, urlvalidator, filevalidator, rename, remove):
+    def test_fetch_image_removes_file_if_it_is_not_an_image(self,
+                                                            urlretrieve,
+                                                            urlvalidator,
+                                                            filevalidator,
+                                                            rename,
+                                                            remove):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = False
         self._fetch_image()
@@ -101,19 +106,32 @@ class ImageFetcherTest(TestCase):
     def _get_tmp_file_path(self):
         return self._image_fetcher._TMP_PATH + self._uuid_value
 
+
 class FileValidatorTest(TestCase):
+    _filename = 'filename'
+
     def setUp(self):
         self._file_validator = FileValidator()
 
     @patch('imageDownloader.what')
     def test_is_image_returns_true_if_file_is_an_image(self, what):
         what.return_value = 'jpeg'
-        self.assertTrue(self._file_validator.is_image('filename'))
+        self.assertTrue(self._file_validator.is_image(self._filename))
 
     @patch('imageDownloader.what')
     def test_is_image_returns_false_if_file_is_not_an_image(self, what):
         what.return_value = 'exe'
-        self.assertFalse(self._file_validator.is_image('filename'))
+        self.assertFalse(self._file_validator.is_image(self._filename))
+
+    @patch('imageDownloader.Image.open')
+    def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
+        image_open.return_value.size = (1280, 720)
+        self.assertTrue(self._file_validator.is_landscape_image(self._filename))
+
+    @patch('imageDownloader.Image.open')
+    def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
+        image_open.return_value.size = (720, 1280)
+        self.assertFalse(self._file_validator.is_landscape_image(self._filename))
 
 
 class UrlProviderTest(TestCase):

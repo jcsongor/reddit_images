@@ -6,6 +6,7 @@ from imghdr import what
 from os import remove, rename
 from urllib.request import urlretrieve
 from uuid import uuid4
+from PIL import Image
 
 
 class ImageDownloader(object):
@@ -45,6 +46,10 @@ class FileValidator(object):
 
     def is_image(self, file):
         return what(file) in self._ALLOWED_TYPES
+
+    def is_landscape_image(self, file):
+        size = Image.open(file).size
+        return size[0] > size[1]
 
 
 class UrlProvider(object):
