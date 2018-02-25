@@ -14,13 +14,16 @@ class ImageDownloaderTest(TestCase):
 
     @patch('imageDownloader.UrlProvider')
     def test_download_images_from_creates_urlprovider_with_correct_bot_name(self, url_provider):
-        self.image_downloader.download_images_from_subreddit(self._bot_name, self._subreddit_name, 100,
+        self.image_downloader.download_images_from_subreddit(self._bot_name,
+                                                             self._subreddit_name, 100,
                                                              self._target_directory)
         url_provider.assert_called_with(self._bot_name)
 
     @patch('imageDownloader.UrlProvider')
     def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self, url_provider):
-        self.image_downloader.download_images_from_subreddit(self._bot_name, self._subreddit_name, 100,
+        self.image_downloader.download_images_from_subreddit(self._bot_name,
+                                                             self._subreddit_name,
+                                                             100,
                                                              self._target_directory)
         url_provider.return_value.get_urls.assert_called_with(self._subreddit_name, 100)
 
@@ -29,7 +32,8 @@ class ImageDownloaderTest(TestCase):
     def test_download_images_from_subreddit_calls_fetch_for_each_url(self, url_provider, fetch):
         image_urls = ['img1', 'img2']
         url_provider.return_value.get_urls.return_value = image_urls
-        self.image_downloader.download_images_from_subreddit(self._bot_name, self._subreddit_name, 100,
+        self.image_downloader.download_images_from_subreddit(self._bot_name,
+                                                             self._subreddit_name, 100,
                                                              self._target_directory)
         fetch.assert_has_calls([call(url, self._target_directory, self._subreddit_name) for url in image_urls])
 
@@ -67,7 +71,9 @@ class ImageFetcherTest(TestCase):
     @patch('imageDownloader.rename')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_does_not_download_image_if_url_is_not_a_valid_image_url(self, urlretrieve, urlvalidator,
+    def test_fetch_image_does_not_download_image_if_url_is_not_a_valid_image_url(self,
+                                                                                 urlretrieve,
+                                                                                 urlvalidator,
                                                                                  rename):
         urlvalidator.return_value.is_valid.return_value = True
         urlvalidator.return_value.is_image.return_value = False
@@ -78,7 +84,10 @@ class ImageFetcherTest(TestCase):
     @patch('imageDownloader.what')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_moves_file_to_target_directory_if_it_is_of_allowed_type(self, urlretrieve, urlvalidator, what,
+    def test_fetch_image_moves_file_to_target_directory_if_it_is_of_allowed_type(self,
+                                                                                 urlretrieve,
+                                                                                 urlvalidator,
+                                                                                 what,
                                                                                  rename):
         urlvalidator.return_value.is_valid.return_value = True
         urlvalidator.return_value.is_image.return_value = True
@@ -105,7 +114,11 @@ class ImageFetcherTest(TestCase):
     @patch('imageDownloader.what')
     @patch('imageDownloader.UrlValidator')
     @patch('imageDownloader.urlretrieve')
-    def test_fetch_image_removes_file_if_it_is_not_of_allowed_type(self, urlretrieve, urlvalidator, what, rename,
+    def test_fetch_image_removes_file_if_it_is_not_of_allowed_type(self,
+                                                                   urlretrieve,
+                                                                   urlvalidator,
+                                                                   what,
+                                                                   rename,
                                                                    remove):
         urlvalidator.return_value.is_valid.return_value = True
         urlvalidator.return_value.is_image.return_value = True
