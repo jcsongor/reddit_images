@@ -25,7 +25,7 @@ class ImageFetcher(object):
     def fetch(self, url, target_dir, subreddit_name):
         url_validator = UrlValidator()
         temp_file = self._TMP_PATH + str(uuid4())
-        if url_validator.is_valid(url) and url_validator.is_image(url):
+        if url_validator.is_image(url):
             urlretrieve(url, temp_file)
             target_file = self._generate_filename(subreddit_name, target_dir, url)
             self._move_from_temp_if_is_image(temp_file, target_file)
@@ -79,7 +79,7 @@ class UrlValidator(object):
     ]
 
     def is_image(self, url):
-        return url.count('.') and url.split('.')[-1] in self._image_extensions
+        return self.is_valid(url) and url.count('.') and url.split('.')[-1] in self._image_extensions
 
     def is_valid(self, url):
         return validators.url(url) is True
