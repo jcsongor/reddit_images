@@ -156,7 +156,7 @@ class UrlProviderTest(TestCase):
         expected_urls = ['https://example.org/dummy.jpeg'] * self._number_of_images
         self.subreddit.return_value.hot.return_value = [MagicMock(url=url) for url in expected_urls]
 
-        result_urls = self.url_provider.get_urls(self._subreddit_name, self._number_of_images)
+        result_urls = list(self.url_provider.get_urls(self._subreddit_name, self._number_of_images))
 
         self.assertEqual(result_urls, expected_urls)
 

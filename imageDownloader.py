@@ -60,7 +60,7 @@ class UrlProvider(object):
 
     def get_urls(self, subreddit_name, number_of_images):
         subreddit = self.reddit.subreddit(subreddit_name)
-        return [submission.url for submission in subreddit.hot(limit=number_of_images)]
+        return (submission.url for submission in subreddit.hot(limit=number_of_images))
 
 
 class UrlValidator(object):
