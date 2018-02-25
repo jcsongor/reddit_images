@@ -1,5 +1,5 @@
 install:
-	pip3 install --user -r requirements.txt
+	pip3 install -r requirements.txt
 
 test:
 	python3 -m unittest test_image_downloader
