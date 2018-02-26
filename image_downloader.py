@@ -5,7 +5,7 @@
 Example:
     Fetch 5 pictures from /r/FractalPorn and /r/ExposurePorn from hot posts and
     dowload it to ~/backgrounds
-        $ python3 image_downloader.py FractalPorn,ExposurePorn 5 ~/backgrounds
+        $ python3 image_downloader.py --subreddits=FractalPorn,ExposurePorn --count=5 --to=~/backgrounds
 
 Todo:
     * make cli interface more flexible
@@ -15,9 +15,10 @@ Todo:
     * optionally download from hot/top etc
 
 """
-import sys
+import os
+from argparse import ArgumentParser
+from collections import ChainMap
 from imghdr import what
-from os import remove, rename
 from urllib.request import urlretrieve
 from uuid import uuid4
 
@@ -29,8 +30,7 @@ import validators
 class ImageDownloader(object):
     """Download top images from a given reddit"""
 
-    def download_images_from_subreddit(self,
-                                       bot_name,
+    def download_images_from_subreddit(self, bot_name,
                                        subreddit_name,
                                        number_of_images,
                                        target_directory):
@@ -59,9 +59,9 @@ class ImageFetcher(object):
 
     def _move_from_temp_if_is_image(self, temp_file, target_file):
         if FileValidator().is_image(temp_file):
-            rename(temp_file, target_file)
+            os.rename(temp_file, target_file)
         else:
-            remove(temp_file)
+            os.remove(temp_file)
 
 
 class FileValidator(object):
@@ -105,7 +105,34 @@ class UrlValidator(object):
         return validators.url(url) is True
 
 
+class Settings(object):
+    """Handle settings from env and cli params"""
+    __settings = None
+    default_settings = {
+        'subreddits': None,
+        'count': 1,
+        'to': '.',
+    }
+    settings = {}
+
+    def __new__(cls, *args, **kwargs):
+        if Settings.__settings is None:
+            Settings.__settings = object.__new__(cls)
+        return Settings.__settings
+
+    def __init__(self, *arg, **kwargs):
+        parser = ArgumentParser()
+        parser.add_argument('-s', '--subreddits')
+        parser.add_argument('-c', '--count')
+        parser.add_argument('-t', '--to')
+
+        cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
+        self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
+
+
+
 if __name__ == "__main__":
-    IMAGE_DOWNLOADER = ImageDownloader()
-    for subreddit_name in sys.argv[1].split(','):
-        IMAGE_DOWNLOADER.download_images_from_subreddit('bgr', subreddit_name, int(sys.argv[2]), sys.argv[3] + '/')
+    settings = Settings().settings
+    image_downloader = ImageDownloader()
+    for subreddit_name in settings['subreddits'].split(','):
+        image_downloader.download_images_from_subreddit('bgr', subreddit_name, int(settings['count']), settings['to'])

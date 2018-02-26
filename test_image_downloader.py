@@ -48,7 +48,7 @@ class ImageFetcherTest(TestCase):
     def setUp(self):
         self._image_fetcher = ImageFetcher()
 
-    @patch('image_downloader.rename')
+    @patch('os.rename')
     @patch('image_downloader.what')
     @patch('image_downloader.UrlValidator')
     @patch('image_downloader.urlretrieve')
@@ -58,7 +58,7 @@ class ImageFetcherTest(TestCase):
         self._fetch_image()
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
 
-    @patch('image_downloader.rename')
+    @patch('os.rename')
     @patch('image_downloader.UrlValidator')
     @patch('image_downloader.urlretrieve')
     def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, urlvalidator, rename):
@@ -66,7 +66,7 @@ class ImageFetcherTest(TestCase):
         self._fetch_image()
         urlretrieve.assert_not_called()
 
-    @patch('image_downloader.rename')
+    @patch('os.rename')
     @patch('image_downloader.FileValidator')
     @patch('image_downloader.UrlValidator')
     @patch('image_downloader.urlretrieve')
@@ -81,8 +81,8 @@ class ImageFetcherTest(TestCase):
         target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
         rename.assert_called_with(self._get_tmp_file_path(), target_filename)
 
-    @patch('image_downloader.remove')
-    @patch('image_downloader.rename')
+    @patch('os.remove')
+    @patch('os.rename')
     @patch('image_downloader.FileValidator')
     @patch('image_downloader.UrlValidator')
     @patch('image_downloader.urlretrieve')
