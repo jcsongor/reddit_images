@@ -90,23 +90,7 @@ class UrlProvider(object):
 
 class UrlValidator(object):
     """Class to validate urls"""
-    _image_extensions = [
-        'jpg',
-        'ai',
-        'rgb',
-        'gif',
-        'pbm',
-        'pgm',
-        'ppm',
-        'tiff',
-        'rast',
-        'xbm',
-        'jpeg',
-        'bmp',
-        'png',
-        'webp',
-        'exr',
-    ]
+    _image_extensions = ['jpg', 'jpeg', 'png']
 
     def is_image(self, url):
         """Check if url looks like an image - it has proper extension"""
@@ -122,7 +106,4 @@ class UrlValidator(object):
 if __name__ == "__main__":
     IMAGE_DOWNLOADER = ImageDownloader()
     for subreddit_name in sys.argv[1].split(','):
-        IMAGE_DOWNLOADER.download_images_from_subreddit('bgr',
-                                                        subreddit_name,
-                                                        int(sys.argv[2]),
-                                                        sys.argv[3] + '/')
+        IMAGE_DOWNLOADER.download_images_from_subreddit('bgr', subreddit_name, int(sys.argv[2]), sys.argv[3] + '/')
