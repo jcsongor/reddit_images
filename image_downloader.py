@@ -5,7 +5,7 @@
 Example:
     Fetch 5 pictures from /r/FractalPorn and /r/ExposurePorn from hot posts and
     dowload it to ~/backgrounds
-        $ python3 imageDownloader.py FractalPorn,ExposurePorn 5 ~/backgrounds
+        $ python3 image_downloader.py FractalPorn,ExposurePorn 5 ~/backgrounds
 
 Todo:
     * make cli interface more flexible
