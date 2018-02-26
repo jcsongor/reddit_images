@@ -9,6 +9,8 @@ Example:
 
 Todo:
     * make cli interface more flexible
+    * set up default settings
+    * make default settings overridable from ENV
     * optionally download only landscape/portrait images
     * optionally download from hot/top etc
 
