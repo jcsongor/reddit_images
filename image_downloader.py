@@ -13,6 +13,7 @@ Todo:
     * make default settings overridable from ENV
     * optionally download only landscape/portrait images
     * optionally download from hot/top etc
+    * check if file exists, add option to overwrite/skip
 
 """
 import os
