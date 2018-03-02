@@ -8,9 +8,6 @@ Example:
         $ python3 image_downloader.py --subreddits=FractalPorn,ExposurePorn --count=5 --to=~/backgrounds
 
 Todo:
-    * make cli interface more flexible
-    * set up default settings
-    * make default settings overridable from ENV
     * optionally download only landscape/portrait images
     * optionally download from hot/top etc
     * check if file exists, add option to overwrite/skip
