@@ -111,6 +111,7 @@ class Settings(object):
         'subreddits': None,
         'count': 1,
         'to': '.',
+        'botname': '.',
     }
     settings = {}
 
@@ -125,6 +126,7 @@ class Settings(object):
         parser.add_argument('-c', '--count')
         parser.add_argument('-t', '--to')
         parser.add_argument('-f', '--filetypes')
+        parser.add_argument('-b', '--botname')
 
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
         self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
@@ -137,4 +139,4 @@ if __name__ == "__main__":
     settings = Settings().settings
     image_downloader = ImageDownloader()
     for subreddit_name in settings['subreddits']:
-        image_downloader.download_images_from_subreddit('bgr', subreddit_name, int(settings['count']), settings['to'])
+        image_downloader.download_images_from_subreddit(settings['botname'], subreddit_name, int(settings['count']), settings['to'])
