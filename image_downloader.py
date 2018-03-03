@@ -10,6 +10,7 @@ Example:
 Todo:
     * optionally download only landscape/portrait images
     * optionally download from hot/top etc
+    * make file types configurable
     * check if file exists, add option to overwrite/skip
 
 """
