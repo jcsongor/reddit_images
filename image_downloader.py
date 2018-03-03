@@ -124,14 +124,17 @@ class Settings(object):
         parser.add_argument('-s', '--subreddits')
         parser.add_argument('-c', '--count')
         parser.add_argument('-t', '--to')
+        parser.add_argument('-f', '--filetypes')
 
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
         self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
+        self.settings['subreddits'] = (subreddit.strip() for subreddit in self.settings['subreddits'].split(','))
+        self.settings['count'] = int(self.settings['count'])
 
 
 
 if __name__ == "__main__":
     settings = Settings().settings
     image_downloader = ImageDownloader()
-    for subreddit_name in settings['subreddits'].split(','):
+    for subreddit_name in settings['subreddits']:
         image_downloader.download_images_from_subreddit('bgr', subreddit_name, int(settings['count']), settings['to'])
