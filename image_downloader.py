@@ -65,11 +65,12 @@ class ImageFetcher(object):
 
 class FileValidator(object):
     """Validate file type and image format"""
-    _ALLOWED_TYPES = ['jpeg', 'png']
+    def __init__(self):
+        self.allowed_types = Settings().settings['filetypes']
 
     def is_image(self, file):
         """Check file contents to see if it looks like an image"""
-        return what(file) in self._ALLOWED_TYPES
+        return what(file) in self.allowed_types
 
     def is_landscape_image(self, file):
         """Check image size to determine if it is landscape or portrait"""
@@ -112,6 +113,7 @@ class Settings(object):
         'count': 1,
         'to': '.',
         'botname': '.',
+        'filetypes': 'jpeg, png',
     }
     settings = {}
 
@@ -131,6 +133,7 @@ class Settings(object):
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
         self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
         self.settings['subreddits'] = (subreddit.strip() for subreddit in self.settings['subreddits'].split(','))
+        self.settings['filetypes'] = (filetype.strip() for filetype in self.settings['filetypes'].split(','))
         self.settings['count'] = int(self.settings['count'])
 
 

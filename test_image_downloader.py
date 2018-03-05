@@ -49,11 +49,13 @@ class ImageFetcherTest(TestCase):
         self._image_fetcher = ImageFetcher()
 
     @patch('os.rename')
+    @patch('image_downloader.FileValidator')
     @patch('image_downloader.what')
     @patch('image_downloader.UrlValidator')
     @patch('image_downloader.urlretrieve')
-    def test_fetch_image_downloads_image_to_tmp_file(self, urlretrieve, urlvalidator, what, rename):
+    def test_fetch_image_downloads_image_to_tmp_file(self, urlretrieve, urlvalidator, what, filevalidator, rename):
         urlvalidator.return_value.is_image.return_value = True
+        filevalidator.return_value.is_image.return_value = True
         what.return_value = 'jpeg'
         self._fetch_image()
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
@@ -110,7 +112,9 @@ class ImageFetcherTest(TestCase):
 class FileValidatorTest(TestCase):
     _filename = 'filename'
 
-    def setUp(self):
+    @patch('image_downloader.Settings')
+    def setUp(self, settings):
+        settings.return_value.settings = {'filetypes': ['jpeg', 'png']}
         self._file_validator = FileValidator()
 
     @patch('image_downloader.what')
@@ -129,7 +133,7 @@ class FileValidatorTest(TestCase):
         self.assertTrue(self._file_validator.is_landscape_image(self._filename))
 
     @patch('image_downloader.Image.open')
-    def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
+    def test_is_landscape_image_returns_false_for_portrait_images(self, image_open):
         image_open.return_value.size = (720, 1280)
         self.assertFalse(self._file_validator.is_landscape_image(self._filename))
 
