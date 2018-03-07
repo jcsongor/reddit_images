@@ -1,3 +1,13 @@
+#
+# sample praw.ini file
+# update with your credentials and copy to praw.ini
+#
+# More info:
+# On praw.ini format: http://praw.readthedocs.io/en/latest/getting_started/configuration/prawini.html
+# On reddit OAuth credentials: https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps
+#
+#
+
 [test]
 client_id=dummy
 client_secret=dummy
