@@ -10,7 +10,6 @@ Example:
 Todo:
     * optionally download only landscape/portrait images
     * optionally download from hot/top etc
-    * make file types configurable
     * check if file exists, add option to overwrite/skip
 
 """
@@ -114,7 +113,9 @@ class Settings(object):
         'to': '.',
         'botname': '.',
         'filetypes': 'jpeg, png',
+        'orientation': 'both',
     }
+    _ORIENTATIONS = ['portrait', 'landscape', 'both']
     settings = {}
 
     def __new__(cls, *args, **kwargs):
@@ -129,12 +130,15 @@ class Settings(object):
         parser.add_argument('-t', '--to')
         parser.add_argument('-f', '--filetypes')
         parser.add_argument('-b', '--botname')
+        parser.add_argument('-o', '--orientation')
 
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
         self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
         self.settings['subreddits'] = (subreddit.strip() for subreddit in self.settings['subreddits'].split(','))
         self.settings['filetypes'] = (filetype.strip() for filetype in self.settings['filetypes'].split(','))
         self.settings['count'] = int(self.settings['count'])
+        if self.settings['orientation'] not in self._ORIENTATIONS:
+            raise ValueError('Orientation should be one of the following: %s' % ', '.join(self._ORIENTATIONS))
 
 
 
