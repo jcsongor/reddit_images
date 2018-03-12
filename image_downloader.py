@@ -72,6 +72,7 @@ class FileValidator(object):
         return what(file) in self.allowed_types
 
     def is_orientation_ok(self, file):
+        """Check image orientation according to settings"""
         size = Image.open(file).size
         orientation = Settings.settings['orientation']
         if size[0] == size[1] or orientation == 'both':
