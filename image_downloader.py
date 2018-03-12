@@ -71,6 +71,15 @@ class FileValidator(object):
         """Check file contents to see if it looks like an image"""
         return what(file) in self.allowed_types
 
+    def is_orientation_ok(self, file):
+        size = Image.open(file).size
+        orientation = Settings.settings['orientation']
+        if size[0] == size[1] or orientation == 'both':
+            return True
+        if size[0] > size[1]:
+            return orientation == 'landscape'
+        return orientation == 'portrait'
+
     def is_landscape_image(self, file):
         """Check image size to determine if it is landscape or portrait"""
         size = Image.open(file).size

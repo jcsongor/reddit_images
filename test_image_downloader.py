@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, call
 
@@ -126,6 +127,23 @@ class FileValidatorTest(TestCase):
     def test_is_image_returns_false_if_file_is_not_an_image(self, what):
         what.return_value = 'exe'
         self.assertFalse(self._file_validator.is_image(self._filename))
+
+    @patch('image_downloader.Settings')
+    @patch('image_downloader.Image.open')
+    def test_is_orientation_ok(self, image_open, settings):
+        TestData = namedtuple('TestData', ['orientation', 'dimensions', 'result'])
+        test_cases = [
+            TestData('landscape', (1280, 720), True),
+            TestData('landscape', (720, 1280), False),
+            TestData('portrait', (1280, 720), False),
+            TestData('portrait', (720, 1280), True),
+            TestData('both', (1280, 720), True),
+            TestData('both', (720, 1280), True),
+        ]
+        for test_case in test_cases:
+            settings.settings = {'orientation': test_case.orientation}
+            image_open.return_value.size = test_case.dimensions
+            self.assertEqual(self._file_validator.is_orientation_ok(self._filename), test_case.result)
 
     @patch('image_downloader.Image.open')
     def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
