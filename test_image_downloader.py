@@ -115,12 +115,18 @@ class FileValidatorTest(TestCase):
     @patch('image_downloader.what')
     def test_is_image_returns_true_if_file_is_an_image(self, what):
         what.return_value = 'jpeg'
-        self.assertTrue(self._file_validator.is_image(self._filename))
+
+        is_image_result = self._file_validator.is_image(self._filename)
+
+        self.assertTrue(is_image_result)
 
     @patch('image_downloader.what')
     def test_is_image_returns_false_if_file_is_not_an_image(self, what):
         what.return_value = 'exe'
-        self.assertFalse(self._file_validator.is_image(self._filename))
+
+        is_image_result = self._file_validator.is_image(self._filename)
+
+        self.assertFalse(is_image_result)
 
     @patch('image_downloader.Settings')
     @patch('image_downloader.Image.open')
@@ -142,12 +148,18 @@ class FileValidatorTest(TestCase):
     @patch('image_downloader.Image.open')
     def test_is_landscape_image_returns_true_for_landscape_images(self, image_open):
         image_open.return_value.size = (1280, 720)
-        self.assertTrue(self._file_validator.is_landscape_image(self._filename))
+
+        landscape_result = self._file_validator.is_landscape_image(self._filename)
+
+        self.assertTrue(landscape_result)
 
     @patch('image_downloader.Image.open')
     def test_is_landscape_image_returns_false_for_portrait_images(self, image_open):
         image_open.return_value.size = (720, 1280)
-        self.assertFalse(self._file_validator.is_landscape_image(self._filename))
+
+        landscape_result = self._file_validator.is_landscape_image(self._filename)
+
+        self.assertFalse(landscape_result)
 
 
 class UrlProviderTest(TestCase):
