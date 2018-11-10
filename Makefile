@@ -4,8 +4,7 @@ install:
 install-dev: install
 	pip install -r requirements/dev.txt
 
-install-all:
-	make install; make install-dev
+install-all: install install-dev
 
 test:
 	python3 -m unittest test_image_downloader
