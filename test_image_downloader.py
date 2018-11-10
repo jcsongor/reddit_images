@@ -107,9 +107,9 @@ class ImageFetcherTest(TestCase):
 class FileValidatorTest(TestCase):
     _filename = 'filename'
 
-    @patch('image_downloader.Settings')
-    def setUp(self, settings):
-        settings.return_value.settings = {'filetypes': ['jpeg', 'png']}
+    def setUp(self):
+        self._patch_settings()
+
         self._file_validator = FileValidator()
 
     @patch('image_downloader.what')
@@ -160,6 +160,12 @@ class FileValidatorTest(TestCase):
         landscape_result = self._file_validator.is_landscape_image(self._filename)
 
         self.assertFalse(landscape_result)
+
+    def _patch_settings(self):
+        patcher = patch('image_downloader.Settings')
+        settings = patcher.start()
+        self.addCleanup(settings.stop())
+        settings.return_value.settings = {'filetypes': ['jpeg', 'png']}
 
 
 class UrlProviderTest(TestCase):
