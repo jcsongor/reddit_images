@@ -62,38 +62,36 @@ class ImageFetcherTest(TestCase):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = True
         what.return_value = 'jpeg'
+
         self._fetch_image()
+
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
 
     def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, urlvalidator, _):
         urlvalidator.return_value.is_image.return_value = False
+
         self._fetch_image()
+
         urlretrieve.assert_not_called()
 
     @patch('image_downloader.FileValidator')
-    def test_fetch_image_moves_file_to_target_directory_if_it_is_an_image(self,
-                                                                          urlvalidator,
-                                                                          filevalidator,
-                                                                          _,
-                                                                          rename):
+    def test_fetch_image_moves_file_to_target_directory_if_it_is_an_image(self, urlvalidator, filevalidator, _, rename):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = True
+
         self._fetch_image()
+
         target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
         rename.assert_called_with(self._get_tmp_file_path(), target_filename)
 
     @patch('image_downloader.FileValidator')
     @patch('os.remove')
-    def test_fetch_image_removes_file_if_it_is_not_an_image(self,
-                                                            remove,
-                                                            filevalidator,
-                                                            _,
-                                                            urlvalidator,
-                                                            rename
-                                                            ):
+    def test_fetch_image_removes_file_if_it_is_not_an_image(self, remove, filevalidator, _, urlvalidator, rename):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = False
+
         self._fetch_image()
+
         rename.assert_not_called()
         remove.assert_called_with(self._get_tmp_file_path())
 
