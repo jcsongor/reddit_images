@@ -57,6 +57,7 @@ class ImageFetcherTest(TestCase):
     def setUp(self):
         self._url_validator = self._patch('image_downloader.UrlValidator')
         self._file_validator = self._patch('image_downloader.FileValidator')
+        self._patch('image_downloader.uuid4').return_value = self._uuid_value
         self._image_fetcher = ImageFetcher()
 
     @patch('image_downloader.what')
@@ -65,14 +66,14 @@ class ImageFetcherTest(TestCase):
         self._file_validator.is_image.return_value = True
         what.return_value = 'jpeg'
 
-        self._fetch_image()
+        self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
 
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
 
     def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, _):
         self._url_validator.return_value.is_image.return_value = False
 
-        self._fetch_image()
+        self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
 
         urlretrieve.assert_not_called()
 
@@ -80,7 +81,7 @@ class ImageFetcherTest(TestCase):
         self._url_validator.return_value.is_image.return_value = True
         self._file_validator.return_value.is_image.return_value = True
 
-        self._fetch_image()
+        self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
 
         target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
         rename.assert_called_with(self._get_tmp_file_path(), target_filename)
@@ -90,15 +91,10 @@ class ImageFetcherTest(TestCase):
         self._url_validator.return_value.is_image.return_value = True
         self._file_validator.return_value.is_image.return_value = False
 
-        self._fetch_image()
+        self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
 
         rename.assert_not_called()
         remove.assert_called_with(self._get_tmp_file_path())
-
-    @patch('image_downloader.uuid4')
-    def _fetch_image(self, uuid):
-        uuid.return_value = self._uuid_value
-        self._image_fetcher.fetch(self._image_url, self._target_directory, self._subreddit_name)
 
     def _get_tmp_file_path(self):
         return self._image_fetcher._TMP_PATH + self._uuid_value
