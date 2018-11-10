@@ -25,7 +25,7 @@ from uuid import uuid4
 
 
 
-class ImageDownloader(object):
+class ImageDownloader:
     """Download top images from a given reddit"""
     def __init__(self, bot_name):
         self._url_provider = UrlProvider(bot_name)
@@ -37,7 +37,7 @@ class ImageDownloader(object):
             self._image_fetcher.fetch(url, target_directory, subreddit_name)
 
 
-class ImageFetcher(object):
+class ImageFetcher:
     """Validate and download an image"""
     _TMP_PATH = '/tmp/'
     def __init__(self):
@@ -62,7 +62,7 @@ class ImageFetcher(object):
             os.remove(temp_file)
 
 
-class FileValidator(object):
+class FileValidator:
     """Validate file type and image format"""
     def __init__(self):
         self.allowed_types = Settings().settings['filetypes']
@@ -87,7 +87,7 @@ class FileValidator(object):
         return size[0] > size[1]
 
 
-class UrlProvider(object):
+class UrlProvider:
     """Class to get a list of image urls from hot posts"""
 
     def __init__(self, bot_name):
@@ -99,7 +99,7 @@ class UrlProvider(object):
         return (submission.url for submission in subreddit.hot(limit=number_of_images))
 
 
-class UrlValidator(object):
+class UrlValidator:
     """Class to validate urls"""
     _image_extensions = ['jpg', 'jpeg', 'png']
 
@@ -114,7 +114,7 @@ class UrlValidator(object):
         return validators.url(url) is True
 
 
-class Settings(object):
+class Settings:
     """Handle settings from env and cli params"""
     __settings = None
     default_settings = {
