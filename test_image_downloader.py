@@ -5,37 +5,29 @@ from unittest.mock import MagicMock, patch, call
 from image_downloader import *
 
 
+@patch('image_downloader.ImageFetcher.fetch')
 class ImageDownloaderTest(TestCase):
     _bot_name = 'bot_name'
     _subreddit_name = 'subreddit_name'
     _target_directory = 'target_directory'
     _number_of_images = 100
+    _url_provider = MagicMock()
 
     def setUp(self):
-        self._patch_urlprovider()
-        self.image_downloader = ImageDownloader(self._bot_name)
+        self.image_downloader = ImageDownloader(self._url_provider)
 
-    def test_init_creates_urlprovider_with_correct_bot_name(self):
-        self._urlprovider.assert_called_with(self._bot_name)
-
-    def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self):
+    def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self, _):
         self._download_images()
 
-        self._urlprovider.return_value.get_urls.assert_called_with(self._subreddit_name, self._number_of_images)
+        self._url_provider.get_urls.assert_called_with(self._subreddit_name, self._number_of_images)
 
-    @patch('image_downloader.ImageFetcher.fetch')
     def test_download_images_from_subreddit_calls_fetch_for_each_url(self, fetch):
         image_urls = ['img1', 'img2']
-        self._urlprovider.return_value.get_urls.return_value = image_urls
+        self._url_provider.get_urls.return_value = image_urls
 
         self._download_images()
 
         fetch.assert_has_calls([call(url, self._target_directory, self._subreddit_name) for url in image_urls])
-
-    def _patch_urlprovider(self):
-        patcher = patch('image_downloader.UrlProvider')
-        self._urlprovider = patcher.start()
-        self.addCleanup(patcher.stop)
 
     def _download_images(self):
         self.image_downloader.download_images_from_subreddit(
