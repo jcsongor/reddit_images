@@ -1,13 +1,10 @@
 
 [![Build Status](https://travis-ci.org/jcsongor/reddit_bots.svg?branch=master)](https://travis-ci.org/jcsongor/reddit_bots)
 
-# Reddit bots
-Collection of reddit bots
-
 ## Image downloader
 Bot that downloads images from top reddit posts
 
-### Usage example:
+### Example usage:
 Fetch 5 pictures from [/r/FractalPorn](https://reddit.com/r/FractalPorn) and [/r/ExposurePorn](https://reddit.com/r/ExposurePorn) from hot posts and dowload it to `~/backgrounds`
 
 ```shell
