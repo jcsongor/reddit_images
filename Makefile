@@ -1,10 +1,11 @@
 install:
-	pip3 install -r requirements/prod.txt
+	pip install -r requirements/prod.txt
 
-install-test: install
-	pip3 install -r requirements/dev.txt
+install-dev: install
+	pip install -r requirements/dev.txt
 
-install-dev: install-test
+install-all:
+	make install; make install-dev
 
 test:
 	python3 -m unittest test_image_downloader
@@ -14,3 +15,6 @@ lint:
 
 lint-strict:
 	python3 -m pylint image_downloader
+
+push:
+	make test && make lint && git push
