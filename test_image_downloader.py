@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch, call
 from image_downloader import *
 
 
+@patch('image_downloader.UrlProvider')
 class ImageDownloaderTest(TestCase):
     _bot_name = 'bot_name'
     _subreddit_name = 'subreddit_name'
@@ -13,14 +14,12 @@ class ImageDownloaderTest(TestCase):
     def setUp(self):
         self.image_downloader = ImageDownloader()
 
-    @patch('image_downloader.UrlProvider')
     def test_download_images_from_creates_urlprovider_with_correct_bot_name(self, url_provider):
         self.image_downloader.download_images_from_subreddit(self._bot_name,
                                                              self._subreddit_name, 100,
                                                              self._target_directory)
         url_provider.assert_called_with(self._bot_name)
 
-    @patch('image_downloader.UrlProvider')
     def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self, url_provider):
         self.image_downloader.download_images_from_subreddit(self._bot_name,
                                                              self._subreddit_name,
@@ -29,8 +28,7 @@ class ImageDownloaderTest(TestCase):
         url_provider.return_value.get_urls.assert_called_with(self._subreddit_name, 100)
 
     @patch('image_downloader.ImageFetcher.fetch')
-    @patch('image_downloader.UrlProvider')
-    def test_download_images_from_subreddit_calls_fetch_for_each_url(self, url_provider, fetch):
+    def test_download_images_from_subreddit_calls_fetch_for_each_url(self, fetch, url_provider):
         image_urls = ['img1', 'img2']
         url_provider.return_value.get_urls.return_value = image_urls
         self.image_downloader.download_images_from_subreddit(self._bot_name,
@@ -39,6 +37,9 @@ class ImageDownloaderTest(TestCase):
         fetch.assert_has_calls([call(url, self._target_directory, self._subreddit_name) for url in image_urls])
 
 
+@patch('os.rename')
+@patch('image_downloader.UrlValidator')
+@patch('image_downloader.urlretrieve')
 class ImageFetcherTest(TestCase):
     _image_filename = 'image.jpeg'
     _image_url = 'http://example.org/' + '.' + _image_filename
@@ -49,34 +50,25 @@ class ImageFetcherTest(TestCase):
     def setUp(self):
         self._image_fetcher = ImageFetcher()
 
-    @patch('os.rename')
     @patch('image_downloader.FileValidator')
     @patch('image_downloader.what')
-    @patch('image_downloader.UrlValidator')
-    @patch('image_downloader.urlretrieve')
-    def test_fetch_image_downloads_image_to_tmp_file(self, urlretrieve, urlvalidator, what, filevalidator, rename):
+    def test_fetch_image_downloads_image_to_tmp_file(self, what, filevalidator, urlretrieve, urlvalidator, _):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = True
         what.return_value = 'jpeg'
         self._fetch_image()
         urlretrieve.assert_called_with(self._image_url, self._get_tmp_file_path())
 
-    @patch('os.rename')
-    @patch('image_downloader.UrlValidator')
-    @patch('image_downloader.urlretrieve')
-    def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, urlvalidator, rename):
+    def test_fetch_image_does_not_download_image_if_url_is_not_an_image_url(self, urlretrieve, urlvalidator, _):
         urlvalidator.return_value.is_image.return_value = False
         self._fetch_image()
         urlretrieve.assert_not_called()
 
-    @patch('os.rename')
     @patch('image_downloader.FileValidator')
-    @patch('image_downloader.UrlValidator')
-    @patch('image_downloader.urlretrieve')
     def test_fetch_image_moves_file_to_target_directory_if_it_is_an_image(self,
-                                                                          urlretrieve,
                                                                           urlvalidator,
                                                                           filevalidator,
+                                                                          _,
                                                                           rename):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = True
@@ -84,17 +76,15 @@ class ImageFetcherTest(TestCase):
         target_filename = self._target_directory + '/' + self._subreddit_name + '_' + self._image_filename
         rename.assert_called_with(self._get_tmp_file_path(), target_filename)
 
-    @patch('os.remove')
-    @patch('os.rename')
     @patch('image_downloader.FileValidator')
-    @patch('image_downloader.UrlValidator')
-    @patch('image_downloader.urlretrieve')
+    @patch('os.remove')
     def test_fetch_image_removes_file_if_it_is_not_an_image(self,
-                                                            urlretrieve,
-                                                            urlvalidator,
+                                                            remove,
                                                             filevalidator,
-                                                            rename,
-                                                            remove):
+                                                            _,
+                                                            urlvalidator,
+                                                            rename
+                                                            ):
         urlvalidator.return_value.is_image.return_value = True
         filevalidator.return_value.is_image.return_value = False
         self._fetch_image()
