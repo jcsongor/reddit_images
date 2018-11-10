@@ -154,27 +154,34 @@ class UrlProviderTest(TestCase):
     _subreddit_name = 'subreddit_name'
     _number_of_images = 100
 
-    @patch('praw.Reddit')
-    def setUp(self, reddit):
-        self.subreddit = MagicMock()
-        reddit.return_value = MagicMock(subreddit=self.subreddit)
-        self.url_provider = UrlProvider('bot_name')
+    def setUp(self):
+        self._subreddit = MagicMock()
+        self._patch_reddit()
+        self._url_provider = UrlProvider('bot_name')
 
     def test_get_urls_fetches_given_subreddit(self):
-        self.url_provider.get_urls(self._subreddit_name, self._number_of_images)
-        self.subreddit.assert_called_once_with(self._subreddit_name)
+        self._url_provider.get_urls(self._subreddit_name, self._number_of_images)
+        self._subreddit.assert_called_once_with(self._subreddit_name)
 
     def test_get_urls_fetches_given_number_of_hot_submissions(self):
-        self.url_provider.get_urls(self._subreddit_name, self._number_of_images)
-        self.subreddit.return_value.hot.assert_called_once_with(limit=self._number_of_images)
+        self._url_provider.get_urls(self._subreddit_name, self._number_of_images)
+        self._subreddit.return_value.hot.assert_called_once_with(limit=self._number_of_images)
 
     def test_get_urls_extracts_urls_from_submissions(self):
         expected_urls = ['https://example.org/dummy.jpeg'] * self._number_of_images
-        self.subreddit.return_value.hot.return_value = [MagicMock(url=url) for url in expected_urls]
+        self._subreddit.return_value.hot.return_value = [MagicMock(url=url) for url in expected_urls]
 
-        result_urls = list(self.url_provider.get_urls(self._subreddit_name, self._number_of_images))
+        result_urls = list(self._url_provider.get_urls(self._subreddit_name, self._number_of_images))
 
         self.assertEqual(result_urls, expected_urls)
+
+    def _patch_reddit(self):
+        patcher = patch('praw.Reddit')
+        reddit = patcher.start()
+        self.addCleanup(reddit.stop())
+
+        reddit.return_value.subreddit = self._subreddit
+
 
 
 class UrlValidatorTest(TestCase):
