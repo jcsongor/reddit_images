@@ -179,10 +179,12 @@ class UrlProviderTest(TestCase):
 
     def test_get_urls_fetches_given_subreddit(self):
         self._url_provider.get_urls(self._subreddit_name, self._number_of_images)
+
         self._subreddit.assert_called_once_with(self._subreddit_name)
 
     def test_get_urls_fetches_given_number_of_hot_submissions(self):
         self._url_provider.get_urls(self._subreddit_name, self._number_of_images)
+
         self._subreddit.return_value.hot.assert_called_once_with(limit=self._number_of_images)
 
     def test_get_urls_extracts_urls_from_submissions(self):
@@ -199,7 +201,6 @@ class UrlProviderTest(TestCase):
         self.addCleanup(reddit.stop())
 
         reddit.return_value.subreddit = self._subreddit
-
 
 
 class UrlValidatorTest(TestCase):
