@@ -42,6 +42,7 @@ class ImageFetcher(object):
     _TMP_PATH = '/tmp/'
     def __init__(self):
         self._url_validator = UrlValidator()
+        self._file_validator = FileValidator()
 
     def fetch(self, url, target_dir, subreddit_name):
         """Download one url, check if it is an image. If it isn't delete it."""
@@ -55,7 +56,7 @@ class ImageFetcher(object):
         return target_dir.rstrip('/') + '/' + subreddit + '_' + url.split('/')[-1].lstrip('.')
 
     def _move_from_temp_if_is_image(self, temp_file, target_file):
-        if FileValidator().is_image(temp_file):
+        if self._file_validator.is_image(temp_file):
             os.rename(temp_file, target_file)
         else:
             os.remove(temp_file)
