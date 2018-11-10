@@ -13,15 +13,16 @@ Todo:
 
 """
 import os
+import praw
+import validators
+
 from argparse import ArgumentParser
 from collections import ChainMap
 from imghdr import what
+from PIL import Image
 from urllib.request import urlretrieve
 from uuid import uuid4
 
-from PIL import Image
-import praw
-import validators
 
 
 class ImageDownloader(object):
