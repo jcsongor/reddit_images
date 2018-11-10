@@ -14,6 +14,3 @@ lint:
 
 lint-strict:
 	python3 -m pylint image_downloader
-
-push:
-	make test && make lint && git push
