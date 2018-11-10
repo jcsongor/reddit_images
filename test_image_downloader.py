@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch, call
 from image_downloader import *
 
 
-@patch('image_downloader.UrlProvider')
 class ImageDownloaderTest(TestCase):
     _bot_name = 'bot_name'
     _subreddit_name = 'subreddit_name'
@@ -13,30 +12,33 @@ class ImageDownloaderTest(TestCase):
     _number_of_images = 100
 
     def setUp(self):
-        self.image_downloader = ImageDownloader()
+        self._patch_urlprovider()
+        self.image_downloader = ImageDownloader(self._bot_name)
 
-    def test_download_images_from_creates_urlprovider_with_correct_bot_name(self, url_provider):
+    def test_init_creates_urlprovider_with_correct_bot_name(self):
+        self._urlprovider.assert_called_with(self._bot_name)
+
+    def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self):
         self._download_images()
 
-        url_provider.assert_called_with(self._bot_name)
-
-    def test_download_images_from_subreddit_calls_urlprovider_with_correct_parameters(self, url_provider):
-        self._download_images()
-
-        url_provider.return_value.get_urls.assert_called_with(self._subreddit_name, self._number_of_images)
+        self._urlprovider.return_value.get_urls.assert_called_with(self._subreddit_name, self._number_of_images)
 
     @patch('image_downloader.ImageFetcher.fetch')
-    def test_download_images_from_subreddit_calls_fetch_for_each_url(self, fetch, url_provider):
+    def test_download_images_from_subreddit_calls_fetch_for_each_url(self, fetch):
         image_urls = ['img1', 'img2']
-        url_provider.return_value.get_urls.return_value = image_urls
+        self._urlprovider.return_value.get_urls.return_value = image_urls
 
         self._download_images()
 
         fetch.assert_has_calls([call(url, self._target_directory, self._subreddit_name) for url in image_urls])
 
+    def _patch_urlprovider(self):
+        patcher = patch('image_downloader.UrlProvider')
+        self._urlprovider = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def _download_images(self):
         self.image_downloader.download_images_from_subreddit(
-            self._bot_name,
             self._subreddit_name,
             self._number_of_images,
             self._target_directory

@@ -26,16 +26,14 @@ import validators
 
 class ImageDownloader(object):
     """Download top images from a given reddit"""
+    def __init__(self, bot_name):
+        self._url_provider = UrlProvider(bot_name)
+        self._image_fetcher = ImageFetcher()
 
-    def download_images_from_subreddit(self, bot_name,
-                                       subreddit_name,
-                                       number_of_images,
-                                       target_directory):
+    def download_images_from_subreddit(self, subreddit_name, number_of_images, target_directory):
         """Download top `n` images from a given subreddit"""
-        url_provider = UrlProvider(bot_name)
-        image_fetcher = ImageFetcher()
-        for url in url_provider.get_urls(subreddit_name, number_of_images):
-            image_fetcher.fetch(url, target_directory, subreddit_name)
+        for url in self._url_provider.get_urls(subreddit_name, number_of_images):
+            self._image_fetcher.fetch(url, target_directory, subreddit_name)
 
 
 class ImageFetcher(object):
@@ -153,6 +151,6 @@ class Settings(object):
 
 if __name__ == "__main__":
     settings = Settings().settings
-    image_downloader = ImageDownloader()
+    image_downloader = ImageDownloader(settings['botname'])
     for subreddit_name in settings['subreddits']:
-        image_downloader.download_images_from_subreddit(settings['botname'], subreddit_name, int(settings['count']), settings['to'])
+        image_downloader.download_images_from_subreddit(subreddit_name, int(settings['count']), settings['to'])
