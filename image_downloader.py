@@ -40,12 +40,13 @@ class ImageDownloader(object):
 class ImageFetcher(object):
     """Validate and download an image"""
     _TMP_PATH = '/tmp/'
+    def __init__(self):
+        self._url_validator = UrlValidator()
 
     def fetch(self, url, target_dir, subreddit_name):
         """Download one url, check if it is an image. If it isn't delete it."""
-        url_validator = UrlValidator()
         temp_file = self._TMP_PATH + str(uuid4())
-        if url_validator.is_image(url):
+        if self._url_validator.is_image(url):
             urlretrieve(url, temp_file)
             target_file = self._generate_filename(subreddit_name, target_dir, url)
             self._move_from_temp_if_is_image(temp_file, target_file)
