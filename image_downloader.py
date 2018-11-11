@@ -129,10 +129,35 @@ class Settings:
     }
     _ORIENTATIONS = ['portrait', 'landscape', 'both']
 
+    def __init__(self, *_, **kwargs):
+        self._settings = self._get_settings(kwargs)
+        self._validate_settings()
+
     def __getitem__(self, key):
         return self._settings[key]
 
-    def __init__(self, *_, **kwargs):
+    def _get_settings(self, kwargs):
+        settings = self._read_settings(kwargs)
+        return self._parse_settings(settings)
+
+    def _validate_settings(self):
+        if self._settings['orientation'] not in self._ORIENTATIONS:
+            raise ValueError(
+                'Orientation should be one of the following: %s' %
+                ', '.join(self._ORIENTATIONS)
+            )
+
+    def _read_settings(self, kwargs):
+        cli_arguments = self._get_cli_arguments()
+        return ChainMap(kwargs, cli_arguments, os.environ, self._settings)
+
+    def _parse_settings(self, settings):
+        settings['subreddits'] = self._csv_to_dict(settings['subreddits'])
+        settings['filetypes'] = self._csv_to_dict(settings['filetypes'])
+        settings['count'] = int(settings['count'])
+        return settings
+
+    def _get_cli_arguments(self):
         parser = ArgumentParser()
         parser.add_argument('-s', '--subreddits')
         parser.add_argument('-c', '--count')
@@ -140,24 +165,10 @@ class Settings:
         parser.add_argument('-f', '--filetypes')
         parser.add_argument('-b', '--botname')
         parser.add_argument('-o', '--orientation')
-
-        cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
-        self._settings = ChainMap(kwargs, cli_arguments, os.environ, self._settings)
-
-        self._settings['subreddits'] = self._csv_to_dict(self._settings['subreddits'])
-        self._settings['filetypes'] = self._csv_to_dict(self._settings['filetypes'])
-        self._settings['count'] = int(self._settings['count'])
-        self._validate_orientation()
+        return {k: v for k, v in vars(parser.parse_args()).items() if v}
 
     def _csv_to_dict(self, csv):
         return (subreddit.strip() for subreddit in csv.split(','))
-
-    def _validate_orientation(self):
-        if self._settings['orientation'] not in self._ORIENTATIONS:
-            raise ValueError(
-                'Orientation should be one of the following: %s' %
-                ', '.join(self._ORIENTATIONS)
-            )
 
 
 
