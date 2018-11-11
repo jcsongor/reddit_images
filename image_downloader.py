@@ -4,8 +4,8 @@
 
 Example:
     Fetch 5 pictures from /r/FractalPorn and /r/ExposurePorn from hot posts and
-    dowload it to ~/backgrounds
-        $ python3 image_downloader.py --subreddits=FractalPorn,ExposurePorn --count=5 --to=~/backgrounds
+    download it to ~/backgrounds
+    $ python image_downloader.py --subreddits=FractalPorn,ExposurePorn --count=5 --to=~/backgrounds
 
 Todo:
     * optionally download from hot/top etc
@@ -126,12 +126,12 @@ class Settings:
     _ORIENTATIONS = ['portrait', 'landscape', 'both']
     settings = {}
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, **_):
         if Settings.__settings is None:
             Settings.__settings = object.__new__(cls)
         return Settings.__settings
 
-    def __init__(self, *arg, **kwargs):
+    def __init__(self, *_, **kwargs):
         parser = ArgumentParser()
         parser.add_argument('-s', '--subreddits')
         parser.add_argument('-c', '--count')
@@ -142,16 +142,27 @@ class Settings:
 
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
         self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
-        self.settings['subreddits'] = (subreddit.strip() for subreddit in self.settings['subreddits'].split(','))
-        self.settings['filetypes'] = (filetype.strip() for filetype in self.settings['filetypes'].split(','))
+
+        self.settings['subreddits'] = self._csv_to_dict(self.settings['subreddits'])
+        self.settings['filetypes'] = self._csv_to_dict(self.settings['filetypes'])
         self.settings['count'] = int(self.settings['count'])
+        self._validate_orientation()
+
+    def _csv_to_dict(self, csv):
+        return (subreddit.strip() for subreddit in csv.split(','))
+
+    def _validate_orientation(self):
         if self.settings['orientation'] not in self._ORIENTATIONS:
-            raise ValueError('Orientation should be one of the following: %s' % ', '.join(self._ORIENTATIONS))
+            raise ValueError(
+                'Orientation should be one of the following: %s' %
+                ', '.join(self._ORIENTATIONS)
+            )
 
 
 
 if __name__ == "__main__":
     settings = Settings().settings
     image_downloader = ImageDownloader(settings['botname'])
+    count = int(settings['count'])
     for subreddit_name in settings['subreddits']:
-        image_downloader.download_images_from_subreddit(subreddit_name, int(settings['count']), settings['to'])
+        image_downloader.download_images_from_subreddit(subreddit_name, count, settings['to'])
