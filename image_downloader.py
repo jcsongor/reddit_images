@@ -119,7 +119,8 @@ class UrlValidator:
 
 class Settings:
     """Handle settings from env and cli params"""
-    _settings = {
+    __shared_dict = {}
+    _default_settings = {
         'subreddits': None,
         'count': 1,
         'to': '.',
@@ -127,11 +128,14 @@ class Settings:
         'filetypes': 'jpeg, png',
         'orientation': 'both',
     }
+    _settings = None
     _ORIENTATIONS = ['portrait', 'landscape', 'both']
 
     def __init__(self, *_, **kwargs):
-        self._settings = self._get_settings(kwargs)
-        self._validate_settings()
+        self.__dict__ = self.__shared_dict
+        if self._settings is None:
+            self._settings = self._get_settings(kwargs)
+            self._validate_settings()
 
     def __getitem__(self, key):
         return self._settings[key]
@@ -149,7 +153,7 @@ class Settings:
 
     def _read_settings(self, kwargs):
         cli_arguments = self._get_cli_arguments()
-        return ChainMap(kwargs, cli_arguments, os.environ, self._settings)
+        return ChainMap(kwargs, cli_arguments, os.environ, self._default_settings)
 
     def _parse_settings(self, settings):
         settings['subreddits'] = self._csv_to_dict(settings['subreddits'])
