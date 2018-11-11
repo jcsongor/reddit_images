@@ -63,7 +63,8 @@ class ImageFetcher:
 class FileValidator:
     """Validate file type and image format"""
     def __init__(self):
-        self.allowed_types = Settings()['filetypes']
+        self._settings = Settings()
+        self.allowed_types = self._settings['filetypes']
 
     def is_image(self, file):
         """Check file contents to see if it looks like an image"""
@@ -72,17 +73,21 @@ class FileValidator:
     def is_orientation_ok(self, file):
         """Check image orientation according to settings"""
         size = Image.open(file).size
-        orientation = Settings()['orientation']
-        if size[0] == size[1] or orientation == 'both':
+        orientation = self._settings['orientation']
+        if self._is_square(*size) or orientation == 'both':
             return True
-        if size[0] > size[1]:
-            return orientation == 'landscape'
-        return orientation == 'portrait'
+        return self._get_orientation(*size) == orientation
 
     def is_landscape_image(self, file):
         """Check image size to determine if it is landscape or portrait"""
         size = Image.open(file).size
-        return size[0] > size[1]
+        return self._get_orientation(*size) == 'landscape'
+
+    def _get_orientation(self, width, height):
+        return 'portrait' if width < height else 'landscape'
+
+    def _is_square(self, width, height):
+        return width == height
 
 
 class UrlProvider:
