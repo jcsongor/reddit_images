@@ -138,6 +138,8 @@ class Settings:
             self._validate_settings()
 
     def __getitem__(self, key):
+        if not self._valid_setting(key):
+            raise KeyError(key)
         return self._settings[key]
 
     def _get_settings(self, kwargs):
@@ -150,6 +152,9 @@ class Settings:
                 'Orientation should be one of the following: %s' %
                 ', '.join(self._ORIENTATIONS)
             )
+
+    def _valid_setting(self, setting):
+        return setting in self._default_settings
 
     def _read_settings(self, kwargs):
         cli_arguments = self._get_cli_arguments()
