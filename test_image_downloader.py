@@ -110,6 +110,7 @@ class ImageFetcherTest(TestCase):
 
 class FileValidatorTest(TestCase):
     _filename = 'filename'
+    _settings = {'filetypes': ['jpeg', 'png']}
 
     def setUp(self):
         self._patch_settings()
@@ -143,7 +144,7 @@ class FileValidatorTest(TestCase):
     @data_provider(orientations)
     @patch('image_downloader.Image.open')
     def test_is_orientation_ok(self, orientation, dimensions, expected_result, image_open):
-        self._settings.settings = {'orientation': orientation}
+        self._settings['orientation'] = orientation
         image_open.return_value.size = dimensions
 
         actual = self._file_validator.is_orientation_ok(self._filename)
@@ -168,9 +169,9 @@ class FileValidatorTest(TestCase):
 
     def _patch_settings(self):
         patcher = patch('image_downloader.Settings')
-        self._settings = patcher.start()
-        self.addCleanup(self._settings.stop)
-        self._settings.return_value.settings = {'filetypes': ['jpeg', 'png']}
+        settings = patcher.start()
+        self.addCleanup(settings.stop)
+        settings.return_value.__getitem__ = lambda _, key: self._settings[key]
 
 
 class UrlProviderTest(TestCase):

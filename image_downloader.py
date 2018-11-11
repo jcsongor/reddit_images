@@ -63,7 +63,7 @@ class ImageFetcher:
 class FileValidator:
     """Validate file type and image format"""
     def __init__(self):
-        self.allowed_types = Settings().settings['filetypes']
+        self.allowed_types = Settings()['filetypes']
 
     def is_image(self, file):
         """Check file contents to see if it looks like an image"""
@@ -72,7 +72,7 @@ class FileValidator:
     def is_orientation_ok(self, file):
         """Check image orientation according to settings"""
         size = Image.open(file).size
-        orientation = Settings.settings['orientation']
+        orientation = Settings()['orientation']
         if size[0] == size[1] or orientation == 'both':
             return True
         if size[0] > size[1]:
@@ -114,8 +114,7 @@ class UrlValidator:
 
 class Settings:
     """Handle settings from env and cli params"""
-    __settings = None
-    default_settings = {
+    _settings = {
         'subreddits': None,
         'count': 1,
         'to': '.',
@@ -124,12 +123,9 @@ class Settings:
         'orientation': 'both',
     }
     _ORIENTATIONS = ['portrait', 'landscape', 'both']
-    settings = {}
 
-    def __new__(cls, **_):
-        if Settings.__settings is None:
-            Settings.__settings = object.__new__(cls)
-        return Settings.__settings
+    def __getitem__(self, key):
+        return self._settings[key]
 
     def __init__(self, *_, **kwargs):
         parser = ArgumentParser()
@@ -141,18 +137,18 @@ class Settings:
         parser.add_argument('-o', '--orientation')
 
         cli_arguments = {k: v for k, v in vars(parser.parse_args()).items() if v}
-        self.settings = ChainMap(kwargs, cli_arguments, os.environ, self.default_settings)
+        self._settings = ChainMap(kwargs, cli_arguments, os.environ, self._settings)
 
-        self.settings['subreddits'] = self._csv_to_dict(self.settings['subreddits'])
-        self.settings['filetypes'] = self._csv_to_dict(self.settings['filetypes'])
-        self.settings['count'] = int(self.settings['count'])
+        self._settings['subreddits'] = self._csv_to_dict(self._settings['subreddits'])
+        self._settings['filetypes'] = self._csv_to_dict(self._settings['filetypes'])
+        self._settings['count'] = int(self._settings['count'])
         self._validate_orientation()
 
     def _csv_to_dict(self, csv):
         return (subreddit.strip() for subreddit in csv.split(','))
 
     def _validate_orientation(self):
-        if self.settings['orientation'] not in self._ORIENTATIONS:
+        if self._settings['orientation'] not in self._ORIENTATIONS:
             raise ValueError(
                 'Orientation should be one of the following: %s' %
                 ', '.join(self._ORIENTATIONS)
@@ -161,7 +157,7 @@ class Settings:
 
 
 if __name__ == "__main__":
-    settings = Settings().settings
+    settings = Settings()
     image_downloader = ImageDownloader(settings['botname'])
     count = int(settings['count'])
     for subreddit_name in settings['subreddits']:
