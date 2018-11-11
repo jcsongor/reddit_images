@@ -13,7 +13,7 @@ test:
 	$(python) -m unittest test_image_downloader
 
 lint:
-	$(python) -m pylint image_downloader --disable=redefined-outer-name,no-self-use,too-few-public-methods,line-too-long,unused-argument,invalid-name
+	$(python) -m pylint image_downloader --disable=redefined-outer-name,no-self-use,too-few-public-methods,invalid-name
 
 lint-strict:
 	$(python) -m pylint image_downloader
