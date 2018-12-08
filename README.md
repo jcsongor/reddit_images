@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.org/jcsongor/reddit_bots.svg?branch=master)](https://travis-ci.org/jcsongor/reddit_bots)
+[![Build Status](https://travis-ci.org/jcsongor/reddit_images.svg?branch=master)](https://travis-ci.org/jcsongor/reddit_images)
 
 ## Image downloader
 Bot that downloads images from top reddit posts
